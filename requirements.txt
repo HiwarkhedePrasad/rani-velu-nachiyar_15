@@ -1,0 +1,7 @@
+rich>=13.0.0
+flask
+requests
+pandas
+numpy
+scikit-learn
+joblib
