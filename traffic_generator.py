@@ -12,9 +12,9 @@ TARGET_URL = "http://localhost:5000"
 TOTAL_BOTS = 50
 
 # --- SIMULATION CONFIG ---
-NORMAL_IAT_RANGE = (1.0, 3.0)  # Seconds (Slow, reading page)
-FLOOD_IAT_RANGE = (0.01, 0.05)   # Seconds (Fast, spamming)
-SLOWLORIS_HOLD = 5.0           # Seconds (Holding connection)
+NORMAL_IAT_RANGE = (0.1, 0.5)  # Faster normal users
+FLOOD_IAT_RANGE = (0.001, 0.01)   # Extreme speed
+SLOWLORIS_HOLD = 2.0           # Faster cycling
 
 # Add counters for better visibility
 request_counters = {
@@ -52,23 +52,28 @@ def normal_user(user_id):
 def flood_bot(bot_id):
     """L7 ATTACK: HTTP Flood (High RPS)."""
     headers = {'X-Simulation-ID': f"bot_flood_{bot_id}"}
+    session = requests.Session()
+    session.headers.update(headers)
+    
     request_count = 0
     while True:
         try:
-            resp = requests.get(f"{TARGET_URL}/flood", headers=headers, timeout=2)
+            with counter_lock:
+                request_counters["attack_sent"] += 1
+                
+            resp = session.get(f"{TARGET_URL}/flood", timeout=1)
             request_count += 1
             
             with counter_lock:
-                request_counters["attack_sent"] += 1
                 if resp.status_code == 403:
                     request_counters["attack_blocked"] += 1
                     
-            if request_count % 100 == 0:
+            if request_count % 500 == 0:
                 console.print(f"[red]🔥 Flood Bot {bot_id}: {request_count} requests sent[/red]")
-                print(f"🔥 Flood Bot {bot_id}: {request_count} requests", flush=True)
                 
-        except Exception as e:
-            time.sleep(1)
+        except Exception:
+            # Don't sleep on error, just retry fast
+            pass
 
 def slowloris_bot(bot_id):
     """L7 ATTACK: Slowloris (Connection Exhaustion)."""
@@ -94,23 +99,28 @@ def slowloris_bot(bot_id):
 def volumetric_bot(bot_id):
     """L4 ATTACK: Volumetric Simulation (High Byte Count)."""
     headers = {'X-Simulation-ID': f"bot_vol_{bot_id}"}
-    payload = "X" * 1024 * 10 # 10KB junk
+    session = requests.Session()
+    session.headers.update(headers)
+    payload = "X" * 1024 * 5 # Reduced to 5KB for speed
+    
     attack_count = 0
     while True:
         try:
-            resp = requests.post(f"{TARGET_URL}/volumetric", headers=headers, data=payload, timeout=2)
+            with counter_lock:
+                request_counters["attack_sent"] += 1
+
+            resp = session.post(f"{TARGET_URL}/volumetric", data=payload, timeout=1)
             attack_count += 1
             
             with counter_lock:
-                request_counters["attack_sent"] += 1
                 if resp.status_code == 403:
                     request_counters["attack_blocked"] += 1
                     
             if attack_count % 50 == 0:
                 console.print(f"[magenta]📦 Volumetric Bot {bot_id}: {attack_count} payloads sent[/magenta]")
                 
-        except Exception as e:
-            time.sleep(0.5)
+        except Exception:
+            pass
 
 def stats_reporter():
     """Print statistics every 5 seconds."""

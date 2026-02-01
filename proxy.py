@@ -45,10 +45,18 @@ system_stats = {
     "attack_allowed_requests": 0,
     "shield_active": True,
     "current_anomaly_score": 0.0,
-    "defense_layer": "Idle"
+    "defense_layer": "Idle",
+    "uptime": 0,
+    "current_rps": 0.0
 }
 
 TARGET_URL = 'http://localhost:5001'
+
+# Global Stats Tracking
+start_time = time.time()
+last_rps_check = time.time()
+request_counter_window = 0
+global_rps = 0.0
 
 def get_client_features(ip, current_time):
     if ip not in ip_stats:
@@ -118,6 +126,14 @@ def reset_stats():
         
     logger.info("🔄 SYSTEM RESET: All stats and bans cleared.")
     print("🔄 SYSTEM RESET: All stats and bans cleared.", flush=True)
+    
+    # Reset Timers
+    global start_time, last_rps_check, request_counter_window, global_rps
+    start_time = time.time()
+    last_rps_check = time.time()
+    request_counter_window = 0
+    global_rps = 0.0
+    
     return jsonify({"status": "success"})
 
 @app.route('/api/stats')
@@ -138,8 +154,24 @@ def proxy(path):
     
     system_stats["total_requests"] += 1
     
-    # FIX: Add request logging
-    logger.debug(f"📥 Request from {client_ip} to /{path}")
+    # FIX: Add request logging - DISABLED FOR PERFORMANCE
+    # logger.debug(f"📥 Request from {client_ip} to /{path}")
+
+    # --- GLOBAL RPS CALCULATION ---
+    with stats_lock:
+        global request_counter_window, last_rps_check, global_rps
+        request_counter_window += 1
+        now = time.time()
+        time_diff = now - last_rps_check
+        
+        if time_diff >= 1.0:
+            global_rps = request_counter_window / time_diff
+            request_counter_window = 0
+            last_rps_check = now
+            
+        system_stats["current_rps"] = round(global_rps, 1)
+        system_stats["uptime"] = int(now - start_time)
+    # ------------------------------
 
     if client_ip in blacklist:
         system_stats["blocked_requests"] += 1
@@ -182,8 +214,9 @@ def proxy(path):
                 logger.warning(f"⚠️ [Admin] Violating Rules: {violation_reason} (Allowed)")
                 print(f"⚠️ [Admin] Violating Rules: {violation_reason} (Allowed)", flush=True)
             else:
-                logger.warning(f"🛡️ BLOCK [{client_ip}]: {violation_reason}")
-                print(f"🛡️ BLOCK [{client_ip}]: {violation_reason}", flush=True)
+                # logger.warning(f"🛡️ BLOCK [{client_ip}]: {violation_reason}")
+                # print(f"🛡️ BLOCK [{client_ip}]: {violation_reason}", flush=True)
+                pass
                 blacklist.add(client_ip)
                 system_stats["blocked_requests"] += 1
                 return jsonify({"error": "Request Blocked", "reason": violation_reason}), 403

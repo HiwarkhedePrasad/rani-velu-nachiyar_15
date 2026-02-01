@@ -16,15 +16,15 @@ logger = logging.getLogger(__name__)
 visitor_count = 0
 
 @app.route('/', defaults={'path': ''})
-@app.route('/<path:path>')
+@app.route('/<path:path>', methods=['GET', 'POST'])
 def home(path):
     global visitor_count
     visitor_count += 1
     
     # Multiple logging methods for visibility
-    print(f"👤 User #{visitor_count} accessed the Vault. Path: /{path}", flush=True)
-    print(f"LOG: Request received for path: {path}", file=sys.stderr, flush=True)
-    logger.info(f"👤 User #{visitor_count} accessed /{path}")
+    # print(f"👤 User #{visitor_count} accessed the Vault. Path: /{path}", flush=True)
+    # print(f"LOG: Request received for path: {path}", file=sys.stderr, flush=True)
+    # logger.info(f"👤 User #{visitor_count} accessed /{path}")
 
     data = {
         "status": "success",
