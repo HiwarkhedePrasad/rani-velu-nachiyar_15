@@ -58,7 +58,7 @@ Sentinel utilizes an **Isolation Forest** (Unsupervised Learning) to detect "Out
 
 ```bash
 # Clone the repo
-git clone https://github.com/your-username/sentinel-ddos.git
+git clone [https://github.com/your-username/sentinel-ddos.git](https://github.com/HiwarkhedePrasad/rani-velu-nachiyar_15)
 cd sentinel-ddos
 
 # Install dependencies
@@ -105,3 +105,4 @@ The Proxy exposes several endpoints for real-time monitoring and control:
 Distributed under the MIT License. See `LICENSE` for more information.
 
 **Disclaimer:** This tool is for **educational purposes only**. Use it to learn how to defend, not how to attack.
+
