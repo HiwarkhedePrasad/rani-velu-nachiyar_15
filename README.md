@@ -1,11 +1,11 @@
 ﻿# rani-velu-nachiyar_15
 ---
 
-# 🛡️ Sentinel: Hybrid DDoS Defense System
+# 🛡️ Heimdall : Hybrid DDoS Defense System
 
 ### Multi-Layered L4/L7 Protection with Isolation Forest ML
 
-Sentinel is an intelligent reverse proxy designed to safeguard origin servers from modern DDoS vectors. By combining **Deterministic Rule-Based Filtering (L7)** with **Machine Learning Anomaly Detection (L4)**, the system creates a resilient "Shield" that learns from traffic patterns in real-time.
+Heimdall  is an intelligent reverse proxy designed to safeguard origin servers from modern DDoS vectors. By combining **Deterministic Rule-Based Filtering (L7)** with **Machine Learning Anomaly Detection (L4)**, the system creates a resilient "Shield" that learns from traffic patterns in real-time.
 
 ---
 
@@ -31,7 +31,7 @@ The system operates on a **Triple-Node Model** to simulate a real-world network 
 
 ### Layer 4: Behavioral AI
 
-Sentinel utilizes an **Isolation Forest** (Unsupervised Learning) to detect "Outliers."
+Heimdall  utilizes an **Isolation Forest** (Unsupervised Learning) to detect "Outliers."
 
 * **Feature Engineering:** The proxy tracks  (Requests per second) and .
 * **Self-Healing:** The model can be re-trained on live data to adapt to "Flash Crowds" (legitimate traffic spikes).
@@ -59,7 +59,7 @@ Sentinel utilizes an **Isolation Forest** (Unsupervised Learning) to detect "Out
 ```bash
 # Clone the repo
 git clone https://github.com/HiwarkhedePrasad/rani-velu-nachiyar_15
-cd sentinel-ddos
+cd Heimdall -ddos
 
 # Install dependencies
 pip install -r requirements.txt
@@ -105,5 +105,6 @@ The Proxy exposes several endpoints for real-time monitoring and control:
 Distributed under the MIT License. See `LICENSE` for more information.
 
 **Disclaimer:** This tool is for **educational purposes only**. Use it to learn how to defend, not how to attack.
+
 
 
